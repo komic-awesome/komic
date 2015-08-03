@@ -2,7 +2,7 @@ var webpack = require('webpack')
   , path = require('path')
   , js_root = path.join(__dirname, 'src')
   , bower_components = path.join(__dirname, 'bower_components')
-
+  , HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
   context: js_root
@@ -12,7 +12,7 @@ module.exports = {
   ]
 , output: {
     filename: '[name].js'
-  , publicPath: '/assets/'
+  , publicPath: '/'
   }
 , resolve: {
     root: [js_root, bower_components]
@@ -47,5 +47,6 @@ module.exports = {
       new webpack.ResolverPlugin
         .DirectoryDescriptionFilePlugin("bower.json", ["main"])
     )
+  , new HtmlWebpackPlugin()
   ]
 }

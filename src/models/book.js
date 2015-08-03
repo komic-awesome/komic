@@ -10,10 +10,20 @@ export default Model.extend({
     }
   }
 
+, getCanvasModelInfo() {
+    return {
+      totalPage: this.get('images').length
+    }
+  }
+
 , getBookCoverImg() {
     var cover = this.get('images')[0]
     return Object.assign({
       src: cover.src
     }, this.getBookCoverSize())
+  }
+
+, getCurrentImage(page) {
+    return this.get('images')[page - 1]
   }
 })

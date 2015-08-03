@@ -17,6 +17,7 @@
     "css-loader": "^0.15.5",
     "grunt": "^0.4.5",
     "grunt-webpack": "^1.0.11",
+    "html-webpack-plugin": "^1.6.0",
     "load-grunt-tasks": "^3.2.0",
     "nib": "^1.1.0",
     "node-libs-browser": "^0.5.2",
