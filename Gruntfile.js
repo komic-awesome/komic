@@ -2,6 +2,9 @@ var webpackConfig = require('./webpack.config.js')
 
 module.exports = function(grunt) {
   require('load-grunt-tasks')(grunt)
+
+  var contentBase = grunt.option('content-base') || './fixtures/ancient-egypt'
+
   grunt.initConfig({
     webpack: {
       options: webpackConfig
@@ -10,7 +13,7 @@ module.exports = function(grunt) {
   , 'webpack-dev-server': {
       options: {
         webpack: webpackConfig
-      , contentBase: './fixtures/ancient-egypt/'
+      , contentBase: contentBase
       , publicPath: '/'
       , port: 8000
       , hot: true
