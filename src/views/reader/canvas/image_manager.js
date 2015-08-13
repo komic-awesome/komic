@@ -105,7 +105,7 @@ export default class {
   onScaleScroll(e) {
     e.preventDefault()
     var [ prevWidth, prevHeight ] = [ this.width, this.height ]
-    this.setScale(this.scale + e.deltaY * 0.01)
+    this.setScale(this.scale - e.deltaY * 0.01)
     var halfDeltaWidth = (prevWidth - this.width) / 2
       , halfDeltaHeight = (prevHeight - this.height) / 2
     this.x = this.x + halfDeltaWidth
