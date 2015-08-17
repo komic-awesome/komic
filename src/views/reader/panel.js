@@ -8,6 +8,10 @@ export default class extends React.Component {
     app.trigger('toggle:thumbview')
   }
 
+  toggleConfigModal() {
+    app.trigger('toggle:modal', { modalId: 'config' })
+  }
+
   render() {
     var canvasModel = app.getModel('canvas')
       , currentPage = canvasModel.get('currentPage')
@@ -21,6 +25,10 @@ export default class extends React.Component {
           <li>
             <a title="目录" className="btn" href="#"
               onClick={ this.toggleThumbview }>总</a>
+          </li>
+          <li>
+            <a title="设定" className="btn" href="#"
+              onClick={ this.toggleConfigModal }>设</a>
           </li>
           <li>
             <Link to="home" href="#" title="返回" className="btn">返</Link>

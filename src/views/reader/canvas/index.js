@@ -9,36 +9,7 @@ import routes from 'routes'
 import VerticalAlignMiddle from 'widgets/vertical_align_middle'
 import ImageManager from './image_manager'
 import CanvasImage from './image'
-
-var ImageLoader = (() => {
-  return new class {
-    constructor() {
-      this.cache = {}
-    }
-
-    hasLoaded(key) {
-      return !!(key in this.cache)
-    }
-
-    load(src) {
-      return new Promise((resolve, reject) => {
-        var image = new Image()
-        image.src = src
-        image.onload = resolve
-        image.onerror = reject
-      })
-    }
-  }
-})()
-
-var Model = Backbone.Model.extend({
-  getCurrentImageUri: () => {
-    var book = app.getModel('book')
-      , currentPage = app.getModel('canvas').get('currentPage')
-
-    return book.getCurrentImageUri(currentPage)
-  }
-})
+import loader from 'manager/loader'
 
 export default class extends React.Component {
 
@@ -46,23 +17,22 @@ export default class extends React.Component {
     super(options)
     this.imageManger = new ImageManager()
     this.state = { loading: true }
-    this.model = new Model()
   }
 
   componentWillReceiveProps() {
     this.state = {
-      loading: !ImageLoader.hasLoaded(this.model.getCurrentImageUri())
+      loading: !(loader.hasLoaded())
     }
   }
 
   componentWillMount() {
     var canvas = app.getModel('canvas')
-    canvas.on('turn:nextPage', ::this.transitionToPage)
+    canvas.on('turn:nextPage turn:prevPage', ::this.transitionToPage)
   }
 
   componentWillUnmount() {
     var canvas = app.getModel('canvas')
-    canvas.off('turn:nextPage', ::this.transitionToPage)
+    canvas.off('turn:nextPage turn:prevPage', ::this.transitionToPage)
   }
 
   transitionToPage() {
@@ -82,9 +52,10 @@ export default class extends React.Component {
     if (!loading) {
       return this.renderWithImage()
     } else {
-      ImageLoader.load(this.model.getCurrentImageUri())
-        .then(() => {
-          this.setState({ loading: false })
+      loader.loadCurrentImage()
+        .then((imageBlob) => {
+          loader.storeCurrentImage(imageBlob)
+          this.setState({ loading: false})
         })
       return this.renderWithLoading()
     }

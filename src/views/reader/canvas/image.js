@@ -4,8 +4,11 @@ import $ from 'jquery'
 import Backbone from 'backbone'
 
 import _ from 'mod/utils'
+import loader from 'manager/loader'
 
 const win = $(window)
+    , MOUSE_RIGHT_BUTTON = 2
+    , SCROLL_DURATION = 230
 
 class Model extends Backbone.Model {
   @_.Memoize()
@@ -18,6 +21,47 @@ class Model extends Backbone.Model {
 
     return (canvasDiagonal / imageDiagonal).toFixed(2)
   }
+}
+
+var MouseLeftClickHandlers = {
+  CLICK_IAMGE_REGION(e) {
+    var point = { pointX: e.pageX, pointY: e.pageY }
+    if (this.imageManger.isPointInLeftImage(point)) {
+      this.turnPrevPage()
+    } else if (this.imageManger.isPointInRightImage(point)) {
+      this.turnNextPage()
+    }
+  }
+, CLICK() {
+    this.turnNextPage()
+  }
+, CLICK_TO_SCROLL() {
+    if (this.imageManger.isInBottom()) {
+      this.turnNextPage()
+    } else {
+      this.imageManger.moveToBottom({ duration: SCROLL_DURATION })
+    }
+  }
+}
+
+var MouseRightClickHandlers = {
+  CLICK_IAMGE_REGION() {}
+, CLICK() {
+    this.turnPrevPage()
+  }
+, CLICK_TO_SCROLL() {
+    if (this.imageManger.isInTop()) {
+      this.turnPrevPage()
+    } else {
+      this.imageManger.moveToTop({ duration: SCROLL_DURATION })
+    }
+  }
+}
+
+var ContextMenuHandlers = {
+  CLICK_IAMGE_REGION() {}
+, CLICK(e) { e.preventDefault() }
+, CLICK_TO_SCROLL(e) { e.preventDefault() }
 }
 
 export default class extends React.Component {
@@ -52,10 +96,21 @@ export default class extends React.Component {
     this.rendered()
   }
 
-  handleClick() {
+  handleClick(e) {
     if (this.dragIsTriggered) { return }
     var canvas = app.getModel('canvas')
+    this::MouseLeftClickHandlers[canvas.get('turnpageMethod')](e)
+  }
+
+  turnPrevPage() {
+    var canvas = app.getModel('canvas')
+    canvas.trigger('turn:prevPage')
+  }
+
+  turnNextPage() {
+    var canvas = app.getModel('canvas')
     canvas.trigger('turn:nextPage')
+    loader.stopLoading()
   }
 
   handleMouseDown(e) {
@@ -66,7 +121,14 @@ export default class extends React.Component {
   }
 
   handleMouseUp(e) {
+    var mouseDown = this.mouseDown
+      , canvas = app.getModel('canvas')
+
     this.mouseDown = false
+
+    if (e.button === MOUSE_RIGHT_BUTTON && mouseDown) {
+      this::MouseRightClickHandlers[canvas.get('turnpageMethod')](e)
+    }
   }
 
   handleMouseMove(e) {
@@ -89,18 +151,27 @@ export default class extends React.Component {
     this.prevPageY = e.pageY
   }
 
+  handleContextMenu(e) {
+    if (e.altKey) { return }
+    var canvas = app.getModel('canvas')
+    this::ContextMenuHandlers[canvas.get('turnpageMethod')](e)
+  }
+
   render() {
     var book = app.getModel('book')
       , currentPage = app.getModel('canvas').get('currentPage')
+      , img = loader.pickCachedImage(currentPage)
 
     return (
-      <img { ...book.getCurrentImage(currentPage) }
+      <img { ...img }
         ref="image"
         draggable="false"
         onClick={ ::this.handleClick }
         onMouseDown={ ::this.handleMouseDown }
         onMouseUp={ ::this.handleMouseUp }
         onMouseMove={ ::this.handleMouseMove}
+        onLoad={ ::loader.preloadImages}
+        onContextMenu={ this.handleContextMenu }
         />
     )
   }

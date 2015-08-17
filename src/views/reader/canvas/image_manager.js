@@ -3,8 +3,10 @@ import _ from 'mod/utils'
 import browser from 'mod/browser'
 
 const win = $(window)
-const TRANSFORM_PROP = browser.getVendorPropertyName('transform')
-const TRANSFORM_ORIGIN_PROP = browser.getVendorPropertyName('transformOrigin')
+    , TRANSFORM_PROP = browser.getVendorPropertyName('transform')
+    , TRANSFORM_ORIGIN_PROP = browser.getVendorPropertyName('transformOrigin')
+    , TRANSITION_PROP = browser.getVendorPropertyName('transition')
+    , VIEW_EDGE_THRESHOLD = 5
 
 export default class {
   constructor(options) {
@@ -14,17 +16,14 @@ export default class {
   }
 
   setViewInfo() {
-    this.viewInfo = {
-      viewWidth: win.width()
-    , viewHeight: win.height()
-    }
+    this.viewWidth = win.width()
+    this.viewHeight = win.height()
   }
 
   setImage(image) {
     this.image = $(image)
 
-    var viewInfo = this.viewInfo
-      , el = this.image
+    var el = this.image
 
     this.naturalWidth = el.width()
     this.naturalHeight = el.height()
@@ -45,7 +44,7 @@ export default class {
   }
 
   setBoundaryInfo() {
-    var { viewWidth, viewHeight } = this.viewInfo
+    var { viewWidth, viewHeight } = this
       , deltaWidth = viewWidth - this.width
       , halfDeltaWidth = deltaWidth / 2
       , deltaHeight = viewHeight - this.height
@@ -78,7 +77,7 @@ export default class {
     this.transform(this.x + deltaX, this.y + deltaY)
   }
 
-  transform(x, y, scale = this.scale) {
+  transform(x, y, scale = this.scale, duration = 0) {
     var node = this.getImage()[0]
       , style = node.style
 
@@ -87,6 +86,7 @@ export default class {
     style[TRANSFORM_PROP] =
       `translate3d(${this.x}px, ${this.y}px, 0) scale(${scale}, ${scale})`
     style[TRANSFORM_ORIGIN_PROP] = '0px 0px'
+    style[TRANSITION_PROP] = duration ? `transform ${duration}ms ease-in-out` : 'none'
 
     return this
   }
@@ -115,7 +115,7 @@ export default class {
   }
 
   moveToCanvasTopCenter() {
-    var { viewWidth } = this.viewInfo
+    var { viewWidth } = this
       , { width } = this
       , moveToX = (viewWidth - width) / 2
       , moveToY = Math.max(...this.boundaryInfo.yRange)
@@ -130,8 +130,38 @@ export default class {
     return this
   }
 
+  isInTop() {
+    var threshold = - VIEW_EDGE_THRESHOLD
+    if (this.height > this.viewHeight && this.y < threshold) { return false }
+    return true
+  }
+
+  moveToTop({ duration }) {
+    this.transform(this.x, 0, this.scale, duration)
+  }
+
+  isInBottom() {
+    var threshold = this.viewHeight - this.height + VIEW_EDGE_THRESHOLD
+    if (this.height > this.viewHeight && this.y > threshold) { return false }
+    return true
+  }
+
+  moveToBottom({ duration }) {
+    this.transform(this.x, this.viewHeight - this.height, this.scale, duration)
+  }
+
+  isPointInLeftImage({ pointX, pointY }) {
+    return ((pointX > this.x && pointX < this.x + this.width / 2)
+      && (pointY > this.y && pointY < this.y + this.height))
+  }
+
+  isPointInRightImage({ pointX, pointY }) {
+    return ((pointX > this.x + this.width / 2 && pointX < this.x + this.width)
+      && (pointY > this.y && pointY < this.y + this.height))
+  }
+
   moveToCanvasCenter() {
-    var { viewWidth, viewHeight } = this.viewInfo
+    var { viewWidth, viewHeight } = this
       , { width, height } = this
       , moveToX = (viewWidth - width) / 2
       , moveToY = (viewHeight - height) / 2

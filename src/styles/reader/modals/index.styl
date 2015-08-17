@@ -1,0 +1,22 @@
+@import './config'
+
+.modal-overlay
+  z-index: 100
+  text-align: center
+  background: rgba(0,0,0,0.8)
+  overflow-x: hidden
+  overflow-y: auto
+  white-space: nowrap
+  .modal-stick
+    height: 100%
+    width: 1px
+    // Remove inline-block's spaces between
+    margin-right: -.31em
+    overflow: hidden
+  .modal-content
+    background: white
+  .modal-stick
+  .modal-content
+    display: inline-block
+    vertical-align: middle
+    text-align: left
