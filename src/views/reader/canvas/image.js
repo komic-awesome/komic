@@ -70,6 +70,7 @@ export default class extends React.Component {
     this.guid = _.uniqueId()
     this.model = new Model()
     this.imageManger = this.props.manager
+    this.state = { display: true }
   }
 
   componentWillMount() {
@@ -90,6 +91,17 @@ export default class extends React.Component {
 
   componentDidMount() {
     this.rendered()
+  }
+
+  componentWillReceiveProps(...args){
+    // Force <img/> to redraw
+    //  See more: http://codepen.io/hxgdzyuyi/pen/LVooxp
+    var node = React.findDOMNode(this)
+    this.setState({ display: false })
+    _.defer(this::() => {
+      if (!document.contains(node)) { return }
+      this.setState({ display: true })
+    })
   }
 
   componentDidUpdate() {
@@ -164,6 +176,7 @@ export default class extends React.Component {
 
     return (
       <img { ...img }
+        style={{ display: this.state.display ? 'block' : 'none' }}
         ref="image"
         draggable="false"
         onClick={ ::this.handleClick }

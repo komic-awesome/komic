@@ -96,7 +96,10 @@ class Loader {
     if (this.hasLoaded(page)) {
       return Promise.resolve()
     } else {
-      return request({xhr: this.xhr, url: src})
+      return (request({ xhr: this.xhr, url: src })
+        .then((imageBlob) => {
+          this.storeCurrentImage(imageBlob)
+        }))
     }
   }
 

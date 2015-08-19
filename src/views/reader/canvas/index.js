@@ -53,8 +53,7 @@ export default class extends React.Component {
       return this.renderWithImage()
     } else {
       loader.loadCurrentImage()
-        .then((imageBlob) => {
-          loader.storeCurrentImage(imageBlob)
+        .then(() => {
           this.setState({ loading: false})
         })
       return this.renderWithLoading()

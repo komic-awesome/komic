@@ -45,11 +45,8 @@ export default class extends React.Component {
     return (
       <div>
         <Panel ref="panel"/>
-        {
-          this.state.thumbview
-            ? <Thumbview ref="thumbview" />
-            : <Canvas ref="canvas" />
-        }
+          <Canvas ref="canvas" />
+          { this.state.thumbview && <Thumbview ref="thumbview" /> }
         <ModalView />
       </div>
     )

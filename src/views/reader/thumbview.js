@@ -6,11 +6,26 @@ import app from 'app'
 import routes from 'routes'
 import Panel from './panel'
 
-export default class extends React.Component {
-
-  closeThumbview() {
+class ThumbViewLink extends React.Component {
+  pageItemClicked(e) {
+    e.preventDefault()
     app.trigger('toggle:thumbview', false)
+    var router = app.get('router')
+    router.transitionTo(this.props.to, this.props.params)
   }
+
+  render() {
+    return (
+      <Link {...this.props}
+        onClick={ ::this.pageItemClicked }
+        >
+        { this.props.children }
+      </Link>
+    )
+  }
+}
+
+export default class extends React.Component {
 
   scrollToCurrentThumb() {
     var current = $(React.findDOMNode(this.refs.current))
@@ -35,14 +50,13 @@ export default class extends React.Component {
 
     return (
       <li className={ klass } key={ index }>
-        <Link to="page" params={{ page: page }}
-          onClick={ this.closeThumbview }
+        <ThumbViewLink to="page" params={{ page: page }}
           ref={ isCurrent ? 'current' : null }
           className="thumb" { ...size }>
           <svg className="thumb" { ...size }
             dangerouslySetInnerHTML={{__html: useTag}}>
           </svg>
-        </Link>
+        </ThumbViewLink>
       </li>
     )
   }
