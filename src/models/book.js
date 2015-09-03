@@ -91,4 +91,12 @@ export default class extends Model {
       })
     )
   }
+
+  getTitle() {
+    return this.get('name')
+  }
+
+  getUUID() {
+    return this.get('content_json_uuid')
+  }
 }
